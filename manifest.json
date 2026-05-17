@@ -1,0 +1,9 @@
+{
+  "name": "BelezaEcosystem",
+  "short_name": "BelezaEco",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FDFAF4",
+  "theme_color": "#603322",
+  "description": "Gestão Completa para Salões de Beleza e Estética"
+}

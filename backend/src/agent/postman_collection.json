@@ -1,0 +1,184 @@
+{
+  "info": {
+    "name": "Beleza Ecosystem - Agent IA",
+    "description": "API do Agente Inteligente",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Agent Info",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/ia",
+          "host": ["{{base_url}}"],
+          "path": ["api", "ia"]
+        },
+        "description": "Obter informações sobre o agente"
+      }
+    },
+    {
+      "name": "Agent Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/ia/health",
+          "host": ["{{base_url}}"],
+          "path": ["api", "ia", "health"]
+        },
+        "description": "Verificar se OpenAI está acessível"
+      }
+    },
+    {
+      "name": "Message - Aumentar Faturamento",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"Como eu aumento meu faturamento em 30%?\",\n  \"establishmentId\": \"{{establishment_id}}\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/ia",
+          "host": ["{{base_url}}"],
+          "path": ["api", "ia"]
+        },
+        "description": "Enviar mensagem de estratégia ao agente"
+      }
+    },
+    {
+      "name": "Message - Criar Agendamento",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"Agende uma consulta para João Silva em 2026-05-10 às 14:00 para corte de cabelo\",\n  \"establishmentId\": \"{{establishment_id}}\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/ia",
+          "host": ["{{base_url}}"],
+          "path": ["api", "ia"]
+        },
+        "description": "Criar um agendamento através do agente"
+      }
+    },
+    {
+      "name": "Message - Gerar Relatório",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"Preciso de um relatório detalhado dos últimos 30 dias\",\n  \"establishmentId\": \"{{establishment_id}}\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/ia",
+          "host": ["{{base_url}}"],
+          "path": ["api", "ia"]
+        },
+        "description": "Solicitar um relatório de desempenho"
+      }
+    },
+    {
+      "name": "Message - Criar Anúncio",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"Crie um anúncio para promoção de cabelo colorido com 25% de desconto\",\n  \"establishmentId\": \"{{establishment_id}}\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/ia",
+          "host": ["{{base_url}}"],
+          "path": ["api", "ia"]
+        },
+        "description": "Solicitar criação de anúncio/campanha"
+      }
+    },
+    {
+      "name": "Message - Análise de Clientes",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"Quem são meus clientes inativos? Como posso reativá-los?\",\n  \"establishmentId\": \"{{establishment_id}}\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/ia",
+          "host": ["{{base_url}}"],
+          "path": ["api", "ia"]
+        },
+        "description": "Análise de clientes e estratégia de reativação"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "token",
+      "value": "SEU_JWT_TOKEN_AQUI"
+    },
+    {
+      "key": "establishment_id",
+      "value": "550e8400-e29b-41d4-a716-446655440000"
+    }
+  ]
+}
