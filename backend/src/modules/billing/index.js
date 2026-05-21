@@ -24,6 +24,7 @@ const {
   SubscriptionService,
   InvoiceService,
   BillingAuditService,
+  UsageService,
 } = require('./services');
 
 // Controllers
@@ -113,6 +114,7 @@ function initBillingModule(sequelize, models = {}, options = {}) {
 
   const auditService = new BillingAuditService(sequelize);
   const paymentProvider = getPaymentProvider(options.paymentProvider);
+  const usageService = new UsageService(sequelize, billingModels);
 
   const planService = new PlanService(billingModels, auditService);
   const subscriptionService = new SubscriptionService(billingModels, paymentProvider, auditService);
@@ -123,6 +125,7 @@ function initBillingModule(sequelize, models = {}, options = {}) {
     subscriptionService,
     invoiceService,
     auditService,
+    usageService,
   };
 
   // ─────────────────────────────────────────────────────────────────────────────

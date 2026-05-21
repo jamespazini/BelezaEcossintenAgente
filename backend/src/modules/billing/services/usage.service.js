@@ -24,6 +24,7 @@ class UsageService {
     CLIENTS: 'clients',
     APPOINTMENTS: 'appointments',
     STORAGE_MB: 'storage_mb',
+    WHATSAPP_MESSAGES: 'whatsapp_messages',
   };
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -43,7 +44,14 @@ class UsageService {
          WHERE tenant_id = $1 
          AND deleted_at IS NULL
          AND date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE)
-        ) as appointments_this_month
+        ) as appointments_this_month,
+        (SELECT COUNT(*) FROM message_logs
+         WHERE tenant_id = $1
+         AND direction = 'OUTBOUND'
+         AND status = 'sent'
+         AND deleted_at IS NULL
+         AND date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE)
+        ) as whatsapp_messages
     `, {
       bind: [tenantId],
       type: this.sequelize.QueryTypes.SELECT,
@@ -80,6 +88,7 @@ class UsageService {
       professionals: plan.limits?.professionals || plan.max_professionals || null,
       clients: plan.limits?.clients || null,
       appointments: plan.limits?.appointments_per_month || plan.max_appointments_per_month || null,
+      whatsapp_messages: plan.limits?.whatsapp_messages || plan.limits?.whatsapp_messages_per_month || plan.max_whatsapp_messages_per_month || null,
     };
 
     // Check for violations
@@ -208,7 +217,7 @@ class UsageService {
     for (const tenant of tenants) {
       try {
         // Create new counters for the current period with 0 count
-        const metricsToReset = ['appointments']; // Only reset monthly metrics
+        const metricsToReset = ['appointments', 'whatsapp_messages']; // Only reset monthly metrics
 
         for (const metric of metricsToReset) {
           await this.sequelize.query(`
@@ -277,6 +286,16 @@ class UsageService {
         limit: limits.clients,
         excess: usage.clients - limits.clients,
         action: `Remova ${usage.clients - limits.clients} cliente(s) antes do downgrade`,
+      });
+    }
+
+    if (limits.whatsapp_messages && usage.whatsapp_messages > limits.whatsapp_messages) {
+      violations.push({
+        metric: 'whatsapp_messages',
+        current: usage.whatsapp_messages,
+        limit: limits.whatsapp_messages,
+        excess: usage.whatsapp_messages - limits.whatsapp_messages,
+        action: `Reduza o volume de mensagens no WhatsApp antes do downgrade`,
       });
     }
 
