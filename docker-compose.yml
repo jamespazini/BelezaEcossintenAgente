@@ -31,23 +31,69 @@ services:
       DB_USER: ${DB_USER:-beleza_user}
       DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required. Copy .env.example to .env and set a strong password}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required. Copy .env.example to .env and set a strong secret}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET is required. Copy .env.example to .env and set a strong secret}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_TOKEN is required. Copy .env.example to .env and set a strong secret}
       JWT_ACCESS_TOKEN_EXPIRATION: ${JWT_ACCESS_TOKEN_EXPIRATION:-1h}
       JWT_REFRESH_TOKEN_EXPIRATION: ${JWT_REFRESH_TOKEN_EXPIRATION:-7d}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
       LOG_LEVEL: ${LOG_LEVEL:-info}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      TWILIO_WHATSAPP_NUMBER: ${TWILIO_WHATSAPP_NUMBER:-}
     volumes:
       - ./backend:/app
       - /app/node_modules
     depends_on:
       database:
         condition: service_healthy
+      redis:
+        condition: service_started
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:5001/api/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))"]
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 30s
+    networks:
+      - belezaecosystem_network
+    restart: unless-stopped
+
+  worker:
+    container_name: belezaecosystem_worker
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: ["node", "src/workers/worker.js"]
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-beleza_db}
+      DB_USER: ${DB_USER:-beleza_user}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required. Copy .env.example to .env and set a strong password}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      TWILIO_WHATSAPP_NUMBER: ${TWILIO_WHATSAPP_NUMBER:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - belezaecosystem_network
+    restart: unless-stopped
+
+  redis:
+    container_name: belezaecosystem_redis
+    image: redis:7-alpine
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
     networks:
       - belezaecosystem_network
     restart: unless-stopped

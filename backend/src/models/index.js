@@ -57,6 +57,9 @@ const MarketingCampaign    = require('./MarketingCampaign')(sequelize);
 const MarketingAutomation  = require('./MarketingAutomation')(sequelize);
 const MiniSiteConfig       = require('./MiniSiteConfig')(sequelize);
 const HelpContactRequest   = require('./HelpContactRequest')(sequelize);
+const ConversationSession  = require('./ConversationSession')(sequelize);
+const MessageLog           = require('./MessageLog')(sequelize);
+const AiAction             = require('./AiAction')(sequelize);
 
 // Phase 7 models
 const CommissionSetting    = require('./CommissionSetting')(sequelize);
@@ -139,6 +142,31 @@ FinancialExit.belongsTo(Tenant, { foreignKey: 'tenant_id', as: 'tenant' });
 Tenant.hasMany(PaymentMethod, { foreignKey: 'tenant_id', as: 'tenantPaymentMethods' });
 PaymentMethod.belongsTo(Tenant, { foreignKey: 'tenant_id', as: 'tenant' });
 
+// Conversation / WhatsApp associations
+Client.hasMany(ConversationSession, { foreignKey: 'customer_id', as: 'conversationSessions' });
+ConversationSession.belongsTo(Client, { foreignKey: 'customer_id', as: 'client' });
+
+Tenant.hasMany(ConversationSession, { foreignKey: 'tenant_id', as: 'conversationSessions' });
+ConversationSession.belongsTo(Tenant, { foreignKey: 'tenant_id', as: 'tenant' });
+
+ConversationSession.hasMany(MessageLog, { foreignKey: 'session_id', as: 'messageLogs' });
+MessageLog.belongsTo(ConversationSession, { foreignKey: 'session_id', as: 'session' });
+
+Client.hasMany(MessageLog, { foreignKey: 'customer_id', as: 'messageLogs' });
+MessageLog.belongsTo(Client, { foreignKey: 'customer_id', as: 'client' });
+
+Tenant.hasMany(MessageLog, { foreignKey: 'tenant_id', as: 'messageLogs' });
+MessageLog.belongsTo(Tenant, { foreignKey: 'tenant_id', as: 'tenant' });
+
+Tenant.hasMany(AiAction, { foreignKey: 'tenant_id', as: 'aiActions' });
+AiAction.belongsTo(Tenant, { foreignKey: 'tenant_id', as: 'tenant' });
+
+ConversationSession.hasMany(AiAction, { foreignKey: 'session_id', as: 'aiActions' });
+AiAction.belongsTo(ConversationSession, { foreignKey: 'session_id', as: 'session' });
+
+Appointment.hasMany(AiAction, { foreignKey: 'appointment_id', as: 'aiActions' });
+AiAction.belongsTo(Appointment, { foreignKey: 'appointment_id', as: 'appointment' });
+
 // ── OWNER Module Associations ──
 // Phase 6 associations
 Tenant.hasMany(MarketingCampaign,   { foreignKey: 'tenant_id', as: 'marketingCampaigns' });
@@ -166,6 +194,7 @@ const allModels = {
   Tenant, ProfessionalDetail, ProfessionalSpecialty, ProfessionalServiceCommission,
   Supplier, Product, Purchase, PurchaseItem,
   InventoryMovement, PaymentTransaction, Subscription, SubscriptionPlan,
+  ConversationSession, MessageLog, AiAction,
   // Phase 6
   MarketingCampaign, MarketingAutomation, MiniSiteConfig, HelpContactRequest,
   // Phase 7
@@ -217,6 +246,9 @@ module.exports = {
   MarketingAutomation,
   MiniSiteConfig,
   HelpContactRequest,
+  ConversationSession,
+  MessageLog,
+  AiAction,
   // Phase 7
   CommissionSetting,
 };

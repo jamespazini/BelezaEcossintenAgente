@@ -236,6 +236,9 @@ if (modules.public && modules.public.routes) {
 app.use('/api/auth/login', bruteForceProtection.checkLoginAllowed());
 app.use('/api/auth', authRoutes);
 
+// WhatsApp Business webhook for inbound messages and status callbacks
+app.use('/api/webhooks/whatsapp', require('./routes/webhook.whatsapp.routes'));
+
 // Onboarding / Self-Signup routes (public)
 const onboardingService = new OnboardingService({
   sequelize,
