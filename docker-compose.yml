@@ -27,8 +27,8 @@ services:
       PORT: 5001
       DB_HOST: database
       DB_PORT: 5432
-      DB_NAME: ${DB_NAME:-beleza_db}
-      DB_USER: ${DB_USER:-beleza_user}
+      DB_NAME: ${DB_NAME:-postgres}
+      DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required. Copy .env.example to .env and set a strong password}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required. Copy .env.example to .env and set a strong secret}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_TOKEN is required. Copy .env.example to .env and set a strong secret}
@@ -43,7 +43,6 @@ services:
       TWILIO_WHATSAPP_NUMBER: ${TWILIO_WHATSAPP_NUMBER:-}
     volumes:
       - ./backend:/app
-      - /app/node_modules
     depends_on:
       database:
         condition: service_healthy
@@ -69,8 +68,8 @@ services:
       NODE_ENV: ${NODE_ENV:-development}
       DB_HOST: database
       DB_PORT: 5432
-      DB_NAME: ${DB_NAME:-beleza_db}
-      DB_USER: ${DB_USER:-beleza_user}
+      DB_NAME: ${DB_NAME:-postgres}
+      DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required. Copy .env.example to .env and set a strong password}
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -104,13 +103,13 @@ services:
     ports:
       - "${DB_PORT:-5433}:5432"
     environment:
-      POSTGRES_DB: ${DB_NAME:-beleza_db}
-      POSTGRES_USER: ${DB_USER:-beleza_user}
+      POSTGRES_DB: ${DB_NAME:-postgres}
+      POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-beleza_user} -d ${DB_NAME:-beleza_db}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-jamespazini} -d ${DB_NAME:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5

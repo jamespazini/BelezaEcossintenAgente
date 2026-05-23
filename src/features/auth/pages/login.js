@@ -133,6 +133,8 @@ export function init() {
                 const userRole = (user?.role || '').toLowerCase();
                 if (userRole === 'master') {
                     navigateTo('/master');
+                } else if (userRole === 'professional') {
+                    navigateTo('/professional/dashboard');
                 } else {
                     navigateTo('/dashboard');
                 }

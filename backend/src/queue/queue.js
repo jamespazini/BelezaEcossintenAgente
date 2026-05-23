@@ -2,7 +2,7 @@
  * BullMQ Queue configuration
  */
 
-const { Queue, QueueScheduler } = require('bullmq');
+const { Queue } = require('bullmq');
 const IORedis = require('ioredis');
 const env = require('../config/env');
 
@@ -15,7 +15,6 @@ const redisConnection = new IORedis({
 });
 
 const createQueue = (name) => {
-  new QueueScheduler(name, { connection: redisConnection });
   return new Queue(name, { connection: redisConnection });
 };
 

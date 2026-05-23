@@ -28,7 +28,7 @@
 | `salvar_anuncio` | Cria campanha de marketing | ✅ |
 | `gerar_relatorio` | Gera relatório de desempenho | ✅ |
 | `consultar_clientes` | Busca clientes | ✅ |
-| `enviar_whatsapp` | Envia mensagem (mock) | ✅ |
+| `enviar_whatsapp` | Envia mensagem (REAL via Twilio) | ✅ |
 | `analisar_desempenho` | Análise detalhada | ✅ |
 
 ### 3. **API REST**
@@ -147,7 +147,7 @@ OPENAI_API_KEY=sua_chave_aqui
 OPENAI_MODEL=gpt-4o-mini
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=beleza_ecosystem
+DB_NAME=postgres
 DB_USER=postgres
 DB_PASSWORD=sua_senha
 ```

@@ -156,19 +156,19 @@ function renderContent() {
                 </div>
                 <div class="card-body">
                     <div class="quick-links">
-                        <a href="#/professional/appointments" class="quick-link">
+                        <a href="/professional/appointments" class="quick-link">
                             <i class="fas fa-calendar"></i>
                             <span>Meus Agendamentos</span>
                         </a>
-                        <a href="#/professional/clients" class="quick-link">
+                        <a href="/professional/clients" class="quick-link">
                             <i class="fas fa-users"></i>
                             <span>Meus Clientes</span>
                         </a>
-                        <a href="#/professional/earnings" class="quick-link">
+                        <a href="/professional/earnings" class="quick-link">
                             <i class="fas fa-money-bill-wave"></i>
                             <span>Meus Ganhos</span>
                         </a>
-                        <a href="#/professional/performance" class="quick-link">
+                        <a href="/professional/performance" class="quick-link">
                             <i class="fas fa-chart-line"></i>
                             <span>Performance</span>
                         </a>

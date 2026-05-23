@@ -35,6 +35,7 @@
 |---------|------|-----------|------------|
 | `README.md` | 📖 Guia Rápido | Uso da API + exemplos | `backend/src/agent/` |
 | `AGENT_DOCS.md` | 📚 Documentação Completa | Técnico + exemplos | `backend/src/agent/` |
+| `WHATSAPP_INTEGRATION.md` | 🔗 NOVO - Integração Real | Fluxo completo WhatsApp + Twilio | `backend/src/agent/` |
 | `agent.service.js` | 🔧 Core | Integração OpenAI | `backend/src/agent/` |
 | `actionParser.js` | 🔧 Core | Parser de ações | `backend/src/agent/` |
 | `prompt.js` | 🔧 Config | PROMPT_BASE | `backend/src/agent/` |

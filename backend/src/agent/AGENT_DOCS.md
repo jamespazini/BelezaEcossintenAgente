@@ -406,7 +406,7 @@ Parâmetros: {
 
 ### 7. enviar_whatsapp
 
-Enviar mensagem WhatsApp (mock atualmente).
+Enviar mensagem WhatsApp usando o fluxo real do `ActionsService` + `WhatsAppService`.
 
 ```javascript
 [AÇÃO: enviar_whatsapp]
@@ -416,7 +416,7 @@ Parâmetros: {
 }
 ```
 
-**⚠️ Nota:** Atualmente retorna mock. Integração real pendente com Twilio.
+**✅ Nota:** A ação roda por fila e registra `MessageLog`/`jobId`, com webhook de status e persistência da conversa.
 
 ---
 

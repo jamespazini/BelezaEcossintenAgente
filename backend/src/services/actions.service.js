@@ -6,6 +6,8 @@
 const { Appointment, Client, Service, MarketingCampaign, FinancialEntry } = require('../models');
 const { Op, fn, col, where: seqWhere } = require('sequelize');
 const logger = require('../utils/logger');
+const WhatsAppService = require('./whatsapp.service');
+const { v4: uuidv4 } = require('uuid');
 
 class ActionsService {
   /**
@@ -311,34 +313,164 @@ class ActionsService {
   }
 
   /**
-   * Enviar WhatsApp (mock por enquanto)
-   * @param {Object} params - { telefone, mensagem }
-   * @returns {Object} Resultado
+   * Enviar WhatsApp - Integração REAL com Twilio via WhatsAppService
+   * @param {Object} params - { telefone, mensagem, tenantId, estabelecimentoId }
+   * @returns {Object} Resultado com job ID real
+   * 
+   * Fluxo:
+   * 1. Validar parâmetros obrigatórios
+   * 2. Validar tenantId (multi-tenant)
+   * 3. Normalizar e validar E.164 do telefone
+   * 4. Criar MessageLog para auditoria
+   * 5. Enfileirar via BullMQ + WhatsAppService
+   * 6. Retornar job ID real para rastreamento
    */
   async sendWhatsApp(params) {
-    try {
-      const { telefone, mensagem } = params;
+    const correlationId = uuidv4();
+    // traceId mantido como alias futuro (para tracing distribuído)
+    const traceId = correlationId;
 
-      if (!telefone || !mensagem) {
-        throw new Error('Telefone e mensagem são obrigatórios');
+    
+
+
+    
+    try {
+      const { telefone, mensagem, tenantId, estabelecimentoId } = params;
+
+      // Validação de parâmetros obrigatórios
+      if (!telefone || !mensagem || !tenantId) {
+        throw new Error('Parâmetros obrigatórios faltando: telefone, mensagem, tenantId');
       }
 
-      logger.info(`[ACTIONS] WhatsApp seria enviado para ${telefone}`);
+      // Normalizar telefone: remover tudo que não é dígito e garantir E.164 para Brasil
+      const phoneCleaned = String(telefone).replace(/\D/g, '');
+      const normalizedPhone = this._normalizeWhatsappPhone(phoneCleaned);
+
+      // Validar E.164: deve começar com código de país (2-3 dígitos) + código de área (2-3 dígitos) + número (7-8 dígitos)
+      // Para Brasil: 55 + 11-99 + 99999-9999 = 10-13 dígitos totais
+      if (!/^\d{10,13}$/.test(normalizedPhone)) {
+        throw new Error(`Telefone inválido: ${this._maskPhone(telefone)}. Formato esperado: E.164 (ex: 5511999999999)`);
+      }
+
+      logger.info('[ACTIONS] Processando envio de WhatsApp', {
+
+        correlationId,
+        tenantId,
+        phone: this._maskPhone(telefone),
+        messageLength: String(mensagem).length,
+        timestamp: new Date().toISOString(),
+      });
+
+
+      // Sanitização/Limites (LGPD + prevenção de prompt injection via payload malicioso)
+      const sanitizedBody = String(mensagem)
+        .replace(/[\u0000-\u001F\u007F]/g, '') // remove controles
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 2000);
+
+
+      // Sanitização de mensagem não deve alterar a validação do fluxo
+      if (!sanitizedBody) {
+        throw new Error('Mensagem inválida');
+      }
+
+      // Criar log de mensagem para auditoria
+      const messageLog = await WhatsAppService.createMessageLog({
+        tenant_id: tenantId,
+
+        customer_id: null, // Agente não tem cliente específico
+        session_id: null,  // Agente não tem sessão
+        whatsapp_number: normalizedPhone,
+        direction: 'OUTBOUND',
+      body: sanitizedBody,
+        status: 'queued',
+
+
+        provider_message_id: null,
+        event_type: 'agent_outbound',
+        metadata: {
+          source: 'agent',
+          correlationId,
+          mensagemTruncada: mensagem.substring(0, 100),
+        },
+      });
+
+      // Enfileirar mensagem real via WhatsAppService
+      // Isso valida subscription, quota, cria o job, etc.
+      const job = await WhatsAppService.queueOutboundMessage({
+        tenantId,
+        to: normalizedPhone,
+        whatsappNumber: normalizedPhone,
+        body: sanitizedBody,
+
+        sessionId: null,
+        messageLogId: messageLog.id,
+        eventType: 'agent_outbound',
+        correlationId,
+        metadata: {
+          estabelecimentoId,
+          source: 'agent',
+        },
+      });
+
+      logger.info('[ACTIONS] WhatsApp enfileirado com sucesso', {
+        correlationId,
+        jobId: job.id,
+        messageLogId: messageLog.id,
+        phone: this._maskPhone(telefone),
+        tenantId,
+      });
 
       return {
         success: true,
         data: {
-          telefone,
-          mensagem,
-          status: 'pending',
-          id: `wa_${Date.now()}`,
+          jobId: job.id,
+          messageLogId: messageLog.id,
+          phone: this._maskPhone(telefone),
+          status: 'queued',
+          correlationId,
+          message: `Mensagem enfileirada com sucesso. Job ID: ${job.id}`,
         },
-        message: `Mensagem agendada para ser enviada para ${telefone}`,
+        message: `Mensagem será enviada para ${this._maskPhone(telefone)} em breve`,
       };
     } catch (error) {
-      logger.error('[ACTIONS] Erro ao enviar WhatsApp:', error);
+      logger.error('[ACTIONS] Erro ao enviar WhatsApp', {
+        correlationId,
+        phone: this._maskPhone(params?.telefone),
+        tenantId: params?.tenantId,
+        error: error.message,
+      });
+
       throw error;
     }
+  }
+
+  /**
+   * Mascarar telefone para logs (LGPD: nunca logar número completo)
+   * Ex: 5511999999999 → 55119****9999
+   * @param {string} phone - Telefone
+   * @returns {string} Telefone mascarado
+   */
+  _maskPhone(phone) {
+    if (!phone) return 'unknown';
+    const cleaned = String(phone).replace(/\D/g, '');
+    if (cleaned.length < 8) return '****';
+    return `${cleaned.substring(0, 4)}****${cleaned.substring(cleaned.length - 4)}`;
+  }
+
+  _normalizeWhatsappPhone(phone) {
+    if (!phone) return '';
+
+    if (phone.startsWith('55')) {
+      return phone;
+    }
+
+    if (/^\d{10,11}$/.test(phone)) {
+      return `55${phone}`;
+    }
+
+    return phone;
   }
 
   /**

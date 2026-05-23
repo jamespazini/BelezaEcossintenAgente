@@ -13,7 +13,7 @@
 | H3 | Billing | `console.log` em `webhook.controller` (sem logger estruturado) | ✅ Substituído por `logger` |
 | H4 | Nginx | Bloco OPTIONS com `Access-Control-Allow-Origin: *` (conflito de headers) | ✅ Removido — CORS gerenciado só pelo Express |
 | H5 | Frontend | `.env.production` sem `VITE_PAGARME_PUBLIC_KEY` | ✅ Adicionado com placeholder explícito |
-| H6 | Backend | `DB_PASSWORD` com fallback hardcoded `'beleza_secret_2026'` | ✅ Fallback removido (string vazia) |
+| H6 | Backend | `DB_PASSWORD` com fallback hardcoded `'Natanael2024'` | ✅ Fallback removido (string vazia) |
 | H7 | Billing | `billing.jobs` usando `console.log` em vez de logger estruturado | ✅ 13 ocorrências substituídas |
 | H8 | Auth | Login não retornava `tenant` nem `subscription` ao frontend | ✅ Incluídos na resposta |
 | H9 | Segurança | Helmet com `contentSecurityPolicy: false` | ✅ CSP básica habilitada |

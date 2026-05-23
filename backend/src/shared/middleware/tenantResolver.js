@@ -7,6 +7,7 @@
 const { TenantError, TenantSuspendedError } = require('../errors');
 const { TENANT_STATUS, ROLES, ERROR_CODES } = require('../constants');
 const logger = require('../utils/logger');
+const { verifyAccessToken } = require('../utils/jwt');
 
 // Cache for tenant lookups (simple in-memory, replace with Redis in production)
 const tenantCache = new Map();
@@ -36,8 +37,11 @@ function createTenantResolver(getTenantBySlug) {
         return next();
       }
 
+      const tokenUser = resolveUserFromAuthorization(req);
+      const effectiveUser = req.user || tokenUser;
+
       // If user is MASTER, they don't need tenant context for some operations
-      if (req.user && req.user.role === ROLES.MASTER) {
+      if (effectiveUser && effectiveUser.role === ROLES.MASTER) {
         // MASTER can optionally specify tenant via header
         const tenantSlug = req.headers['x-tenant-slug'];
         if (tenantSlug) {
@@ -53,12 +57,12 @@ function createTenantResolver(getTenantBySlug) {
 
       if (!tenantSlug) {
         // Check if tenant is embedded in JWT
-        if (req.user && req.user.tenantId) {
-          req.tenantId = req.user.tenantId;
-          // Optionally fetch full tenant data if needed
+        if (effectiveUser && effectiveUser.tenantId) {
+          req.user = effectiveUser;
+          req.tenantId = effectiveUser.tenantId;
           return next();
         }
-        
+
         throw new TenantError(
           'Tenant não identificado. Use um subdomínio válido ou header X-Tenant-Slug.',
           ERROR_CODES.TENANT_REQUIRED
@@ -117,6 +121,33 @@ function extractTenantSlug(req) {
   }
 
   return null;
+}
+
+function resolveUserFromAuthorization(req) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return null;
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  try {
+    const decoded = verifyAccessToken(token);
+    const user = {
+      id: decoded.id,
+      email: decoded.email,
+      role: decoded.role,
+      tenantId: decoded.tenantId || null,
+    };
+
+    if (decoded.tenantId) {
+      req.tenantId = decoded.tenantId;
+    }
+
+    return user;
+  } catch {
+    return null;
+  }
 }
 
 /**

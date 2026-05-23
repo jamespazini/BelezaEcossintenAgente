@@ -146,26 +146,40 @@ cd backend && npm install && cd ..
 
 # 3. Configurar variáveis de ambiente
 cp .env.example backend/.env
-# Editar backend/.env com suas credenciais
+# Editar backend/.env com suas credenciais do banco de dados e Twilio (WhatsApp)
 
 # 4. Rodar migrations
 cd backend
 npx sequelize-cli db:migrate
 
-# 5. (Opcional) Seeds
+# 5. Popular o banco com dados de teste (Seeds)
 npx sequelize-cli db:seed:all
 cd ..
 
 # 6. Iniciar backend (terminal 1)
 cd backend && npm run dev
 
-# 7. Iniciar frontend (terminal 2)
+# 7. Iniciar workers/filas para WhatsApp e IA (terminal 2)
+# Em produção isso roda como serviço separado. No dev, abra outro terminal:
+cd backend && node src/workers/worker.js
+
+# 8. Iniciar frontend (terminal 3)
 npm run dev
 ```
 
 - Frontend: `http://localhost:5173`
 - Backend: `http://localhost:5001`
 - Swagger UI: `http://localhost:5001/api/docs`
+
+### Usuários de Teste (Seeds)
+
+Após rodar o comando de seed (`db:seed:all`), as seguintes contas estarão disponíveis (senha: `123456`):
+
+- **Master:** `master@belezaecosystem.com` (Painel SaaS e faturamento geral)
+- **Owner:** `owner@belezapura.com` (Dono do salão, acesso financeiro e envio de WhatsApp)
+- **Admin:** `admin@belezapura.com` (Administrador do salão)
+- **Profissional 1:** `prof@belezapura.com` (Acesso apenas à sua agenda)
+- **Profissional 2:** `carlos@belezapura.com`
 
 ---
 
@@ -203,6 +217,9 @@ Copie `.env.example` para `backend/.env`:
 | `CORS_ORIGIN` | ✅ | Origins permitidas (vírgula separado) |
 | `PAGARME_API_KEY` | — | Chave Pagar.me (produção) |
 | `ENABLE_DOCS` | — | `true` para ativar Swagger em produção |
+| `TWILIO_ACCOUNT_SID` | — | Account SID do Twilio (para WhatsApp) |
+| `TWILIO_AUTH_TOKEN` | — | Auth Token do Twilio |
+| `TWILIO_WHATSAPP_NUMBER` | — | Número de remetente aprovado no Twilio |
 
 ---
 
@@ -358,6 +375,7 @@ belezaecosystem/
 | 7 | Migrations, índices, validação, contratos | ✅ |
 | 8 | Testes (133), Swagger, rate limits, observabilidade | ✅ |
 | 9 | Auditoria arquitetural, limpeza, README | ✅ |
+| 10 | Fix de roteamento (Dashboards por Perfil) e WhatsApp Messaging UI/API | ✅ |
 
 **Próximos passos:**
 - CORS wildcard para subdomínios de tenants (`*.belezaecosystem.com.br`)

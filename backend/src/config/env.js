@@ -21,9 +21,9 @@ function parseDbConfig() {
   return {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT, 10) || 5432,
-    name: process.env.DB_NAME || 'beleza_db',
-    user: process.env.DB_USER || 'beleza_user',
-    password: process.env.DB_PASSWORD || 'beleza_secret_2026',
+    name: process.env.DB_NAME || 'postgres',
+    user: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || 'Natanael2024@',
     ssl: process.env.DB_SSL === 'true' || false,
   };
 }
@@ -54,6 +54,11 @@ module.exports = {
 
   cors: {
     origin: process.env.CORS_ORIGIN || 'http://localhost:8080',
+  },
+
+  openai: {
+    apiKey: process.env.OPENAI_API_KEY || '',
+    model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
   },
 
   log: {

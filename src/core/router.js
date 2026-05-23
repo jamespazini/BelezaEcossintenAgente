@@ -57,6 +57,7 @@ const routes = {
     '/help': { title: 'Ajuda & Suporte - BelezaEcosystem', page: 'help', auth: true },
     '/mini-site': { title: 'Mini-site - BelezaEcosystem', page: 'mini-site', auth: true },
     '/team-commissions': { title: 'Equipe & Comissões - BelezaEcosystem', page: 'team-commissions', auth: true },
+    '/whatsapp': { title: 'Mensagens - BelezaEcosystem', page: 'whatsapp', auth: true },
 };
 
 // Page module loaders (lazy)
@@ -219,6 +220,7 @@ async function loadPageModule(page) {
         'help': () => import('../features/help/pages/help.js'),
         'mini-site': () => import('../features/mini-site/pages/mini-site.js'),
         'team-commissions': () => import('../features/professionals/pages/team-commissions.js'),
+        'whatsapp': () => import('../features/whatsapp/pages/whatsapp.js'),
     };
 
     const loader = moduleMap[page];

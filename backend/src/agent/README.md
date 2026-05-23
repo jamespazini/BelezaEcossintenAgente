@@ -8,7 +8,7 @@ O **Agente Inteligente** é um assistente de IA alimentado por OpenAI que ajuda 
 
 ✅ **Agendamentos** - Criar, atualizar e listar agendamentos  
 ✅ **Marketing** - Gerar anúncios e campanhas  
-✅ **WhatsApp** - Enviar mensagens (mock por enquanto)  
+✅ **WhatsApp** - Enviar e receber mensagens com gravação de cliente e conversa  
 ✅ **Relatórios** - Análises de desempenho e faturamento  
 ✅ **Clientes** - Consultar e gerenciar  
 ✅ **Estratégia** - Sugerir ações para aumentar receita  
@@ -294,7 +294,8 @@ curl http://localhost:3000/api/ia/health
 
 ## ⚠️ Limitações Atuais
 
-- ❌ WhatsApp: Mock apenas (sem integração real)
+- ✅ WhatsApp real com Twilio, webhook inbound, fila outbound e persistência de conversa  
+- 🔒 Cliente novo é criado automaticamente no primeiro contato WhatsApp  
 - ⏳ Contexto: Máximo de tokens limitado
 - 🔄 Transações: Sem rollback automático
 
@@ -302,8 +303,8 @@ curl http://localhost:3000/api/ia/health
 
 ## 📚 Próximos Passos
 
-- [ ] Integrar WhatsApp real (Twilio/WhatsApp Business API)
-- [ ] Adicionar histórico de conversas
+- [x] Integrar WhatsApp real (Twilio/WhatsApp Business API)
+- [x] Adicionar histórico de conversas
 - [ ] Implementar feedback loop
 - [ ] Multi-idioma
 - [ ] Análise de sentimento

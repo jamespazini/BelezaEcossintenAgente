@@ -130,6 +130,35 @@ describe('extractTenantSlug', () => {
   });
 });
 
+describe('createTenantResolver', () => {
+  const { createTenantResolver } = require('../src/shared/middleware/tenantResolver');
+  const { generateAccessToken } = require('../src/shared/utils/jwt');
+
+  test('uses tenantId from bearer token when no tenant slug is present', async () => {
+    const getTenantBySlug = jest.fn();
+    const middleware = createTenantResolver(getTenantBySlug);
+    const token = generateAccessToken({
+      id: 'user-1',
+      email: 'owner@test.com',
+      role: 'owner',
+      tenantId: 'tenant-123',
+    });
+    const req = {
+      path: '/api/clients',
+      headers: { authorization: `Bearer ${token}` },
+      query: {},
+    };
+    const res = {};
+    const next = jest.fn();
+
+    await middleware(req, res, next);
+
+    expect(req.tenantId).toBe('tenant-123');
+    expect(getTenantBySlug).not.toHaveBeenCalled();
+    expect(next).toHaveBeenCalledWith();
+  });
+});
+
 // ─── requireActiveSubscription logic ─────────────────────────────────────────
 
 describe('requireActiveSubscription status logic', () => {

@@ -5,7 +5,7 @@
 
 const express = require('express');
 const AgentController = require('../controllers/agent.controller');
-const { authenticate } = require('../shared/middleware/auth');
+const { authenticate, ensureTenantMember } = require('../shared/middleware/auth');
 
 const router = express.Router();
 
@@ -20,7 +20,7 @@ router.get('/', AgentController.getInfo);
  * Enviar mensagem para o agente
  * Body: { message, establishmentId }
  */
-router.post('/', authenticate, AgentController.processMessage);
+router.post('/', authenticate, ensureTenantMember, AgentController.processMessage);
 
 /**
  * GET /api/ia/health

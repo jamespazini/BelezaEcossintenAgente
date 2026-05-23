@@ -35,6 +35,35 @@ class ConversationService {
     });
   }
 
+  async ensureClientForInbound({ tenantId, phone, body = '' }) {
+    const sanitizedPhone = this._normalizePhone(phone);
+    if (!sanitizedPhone) {
+      return null;
+    }
+
+    const existingClient = await this.findClientByPhone(tenantId, sanitizedPhone);
+    if (existingClient) {
+      return existingClient;
+    }
+
+    const createdClient = await this.models.Client.create({
+      id: uuidv4(),
+      tenant_id: tenantId,
+      first_name: 'Cliente',
+      last_name: 'WhatsApp',
+      phone: sanitizedPhone,
+      notes: `Contato criado automaticamente via WhatsApp em ${new Date().toISOString()}. Mensagem inicial: ${String(body).slice(0, 160)}`,
+    });
+
+    logger.info('[ConversationService] Cliente criado via WhatsApp', {
+      tenantId,
+      clientId: createdClient.id,
+      phone: sanitizedPhone,
+    });
+
+    return createdClient;
+  }
+
   async findOrCreateSession({ tenantId, customerId, customerNumber, whatsappNumber }) {
     const [session] = await this.models.ConversationSession.findOrCreate({
       where: {
@@ -85,13 +114,17 @@ class ConversationService {
     const tenantId = tenant.id;
     const whatsappNumber = this._normalizePhone(to);
     const fromNumber = this._normalizePhone(from);
-    const client = await this.findClientByPhone(tenantId, fromNumber);
+    const client = await this.ensureClientForInbound({ tenantId, phone: fromNumber, body });
     const session = await this.findOrCreateSession({
       tenantId,
       customerId: client?.id || null,
       customerNumber: fromNumber,
       whatsappNumber,
     });
+
+    if (client?.id && session.customer_id !== client.id) {
+      await this.updateSession(session, { customer_id: client.id });
+    }
 
     await this.logMessage({
       tenantId,

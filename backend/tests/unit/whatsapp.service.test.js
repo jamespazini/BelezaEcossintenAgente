@@ -9,6 +9,9 @@ const mockAddJob = jest.fn(async (name, payload, options) => ({ id: `job-${name}
 const mockUpdateLog = jest.fn(async () => [1]);
 const mockFindOne = jest.fn(async () => ({ id: 'message-log-1' }));
 const mockCreateMessageLog = jest.fn(async (data) => ({ id: 'message-log-created', ...data }));
+const mockSubscriptionFindOne = jest.fn(async () => ({ status: 'active' }));
+const mockCheckLimit = jest.fn(async () => ({ allowed: true, limit: null, current: 0 }));
+const mockIncrementUsage = jest.fn(async () => ({ ok: true }));
 
 jest.mock('../../src/queue/queue', () => ({
   queues: {
@@ -16,6 +19,27 @@ jest.mock('../../src/queue/queue', () => ({
     appointmentReminders: { add: mockAddJob },
   },
   redisConnection: {},
+}));
+
+jest.mock('../../src/modules', () => ({
+  initializeModules: jest.fn(() => ({
+    billing: {
+      models: {
+        Subscription: {
+          findOne: mockSubscriptionFindOne,
+        },
+      },
+      services: {
+        usageService: {
+          checkLimit: mockCheckLimit,
+          METRICS: {
+            WHATSAPP_MESSAGES: 'whatsapp_messages',
+          },
+          incrementUsage: mockIncrementUsage,
+        },
+      },
+    },
+  })),
 }));
 
 jest.mock('../../src/models', () => ({
@@ -41,6 +65,9 @@ describe('WhatsAppService', () => {
     mockUpdateLog.mockClear();
     mockCreateMessageLog.mockClear();
     mockFindOne.mockClear();
+    mockSubscriptionFindOne.mockClear();
+    mockCheckLimit.mockClear();
+    mockIncrementUsage.mockClear();
   });
 
   test('queueOutboundMessage enqueues a Twilio send job with retry settings', async () => {

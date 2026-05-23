@@ -73,7 +73,7 @@ Status: ✅ IMPLEMENTAÇÃO COMPLETA
 - [x] `salvar_anuncio` - SaveAnnouncement
 - [x] `gerar_relatorio` - GenerateReport
 - [x] `consultar_clientes` - ConsultClients
-- [x] `enviar_whatsapp` - SendWhatsApp (mock)
+- [x] `enviar_whatsapp` - SendWhatsApp (REAL - Twilio integrado)
 - [x] `analisar_desempenho` - AnalyzePerformance
 
 ### ✅ Integração com Banco de Dados

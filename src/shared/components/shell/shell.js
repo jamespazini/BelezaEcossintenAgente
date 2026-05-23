@@ -54,6 +54,7 @@ export function renderShell(activePage, contentHTML = '') {
         // Fase 5
         { id: 'team-commissions', icon: 'fas fa-medal', label: 'Equipe & Comissões', path: '/team-commissions', roles: ['owner', 'admin'] },
         { id: 'marketing', icon: 'fas fa-bullhorn', label: 'Marketing', path: '/marketing', roles: ['owner', 'admin'] },
+        { id: 'whatsapp', icon: 'fab fa-whatsapp', label: 'WhatsApp', path: '/whatsapp', roles: ['owner', 'admin'] },
         { id: 'ai-assistant', icon: 'fas fa-robot', label: 'Secretária IA', path: '/ai-assistant', roles: ['owner', 'admin'] },
         { id: 'mini-site', icon: 'fas fa-globe', label: 'Mini-site', path: '/mini-site', roles: ['owner', 'admin'] },
         { id: 'billing', icon: 'fas fa-credit-card', label: 'Assinatura', path: '/billing', roles: ['master', 'owner', 'admin'] },
@@ -75,7 +76,7 @@ export function renderShell(activePage, contentHTML = '') {
         { label: 'Gestão', ids: ['appointments', 'clients', 'services', 'professionals'] },
         { label: 'Financeiro', ids: ['financial', 'reports', 'payment-transactions', 'payment-methods'] },
         { label: 'Estoque', ids: ['inventory', 'suppliers', 'purchases'] },
-        { label: 'Crescimento', ids: ['team-commissions', 'marketing', 'ai-assistant', 'mini-site'] },
+        { label: 'Crescimento', ids: ['team-commissions', 'marketing', 'whatsapp', 'ai-assistant', 'mini-site'] },
         { label: 'Conta', ids: ['billing', 'settings', 'account', 'users', 'professional-details'] },
         { label: 'Suporte', ids: ['help'] },
         { label: 'Master', ids: ['master'] },

@@ -365,6 +365,8 @@ const aiAssistantRoutes  = require('./routes/owner/ai-assistant');
 const miniSiteRoutes     = require('./routes/owner/mini-site');
 const commissionsRoutes  = require('./routes/owner/commissions');
 const helpRoutes         = require('./routes/help');
+const agentRoutes        = require('./routes/agent.routes');
+const whatsappApiRoutes  = require('./routes/owner/whatsapp');
 
 app.use('/api/services', requireActiveSubscription(), ownerServicesRoutes);
 app.use('/api/clients', requireActiveSubscription(), ownerClientsRoutes);
@@ -372,6 +374,7 @@ app.use('/api/appointments', requireActiveSubscription(), ownerAppointmentsRoute
 app.use('/api/financial', requireActiveSubscription(), ownerFinancialRoutes);
 app.use('/api/professionals', requireActiveSubscription(), ownerProfessionalsRoutes);
 app.use('/api/reports', requireActiveSubscription({ allowReadOnly: true }), ownerReportsRoutes);
+app.use('/api/whatsapp', requireActiveSubscription(), whatsappApiRoutes);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Phase 6 — New module routes
@@ -380,6 +383,9 @@ app.use('/api/reports', requireActiveSubscription({ allowReadOnly: true }), owne
 // Marketing & Automations (write limiter on POST/PATCH ops)
 app.use('/api/marketing/campaigns', marketingWriteLimiter);
 app.use('/api/marketing', requireActiveSubscription(), marketingRoutes);
+
+// Agent IA
+app.use('/api/ia', aiAssistantLimiter, agentRoutes);
 
 // AI Assistant (derived data — no heavy writes, allow read-only)
 app.use('/api/ai', aiAssistantLimiter, requireActiveSubscription({ allowReadOnly: true }), aiAssistantRoutes);

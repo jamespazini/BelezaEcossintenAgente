@@ -19,8 +19,13 @@ const ConversationService = require('../../src/services/conversation.service');
 
 function makeModels(overrides = {}) {
   return {
-    Client: { findOne: jest.fn(async () => overrides.client || null) },
-    ConversationSession: { findOrCreate: jest.fn(async () => [overrides.session, false]) },
+    Client: {
+      findOne: jest.fn(async () => overrides.client || null),
+      create: jest.fn(async (data) => ({ id: 'client-created', ...data })),
+    },
+    ConversationSession: {
+      findOrCreate: jest.fn(async () => [overrides.session || { id: 'session-created', customer_id: null, update: jest.fn(async function (changes) { Object.assign(this, changes); return this; }) }, false]),
+    },
     MessageLog: { create: jest.fn(async (data) => ({ id: 'log-1', ...data })) },
     AiAction: { create: jest.fn(async (data) => ({ id: 'action-1', ...data })) },
     Appointment: { findOne: jest.fn(async () => overrides.appointment || null) },
@@ -103,11 +108,30 @@ describe('ConversationService', () => {
     expect(result.response).toContain('Estamos analisando seu pedido');
   });
 
+  test('cria cliente e vincula sessão quando chega mensagem do WhatsApp de contato novo', async () => {
+    const session = { id: 'session-6', customer_id: null, update: jest.fn(async function (changes) { Object.assign(this, changes); return this; }) };
+    const models = makeModels({ session });
+    const service = new ConversationService(models, null);
+
+    await service.processInbound({ tenant: { id: 'tenant-1' }, body: 'Olá, gostaria de agendar', from: '+55 11 99999-9999', to: '+55 15 99887-7766', messageSid: 'sid-6' });
+
+    expect(models.Client.create).toHaveBeenCalledWith(expect.objectContaining({
+      tenant_id: 'tenant-1',
+      phone: '5511999999999',
+      first_name: 'Cliente',
+      notes: expect.stringContaining('WhatsApp'),
+    }));
+
+    const createdClientId = models.Client.create.mock.calls[0][0].id;
+    expect(session.update).toHaveBeenCalledWith(expect.objectContaining({ customer_id: createdClientId }));
+    expect(models.MessageLog.create).toHaveBeenCalledWith(expect.objectContaining({ customer_id: createdClientId }));
+  });
+
   test('propaga erros de banco de dados quando a criação de sessão falha', async () => {
     const sessionErrorModels = makeModels();
     sessionErrorModels.ConversationSession.findOrCreate.mockRejectedValueOnce(new Error('Database unavailable'));
     const service = new ConversationService(sessionErrorModels, null);
 
-    await expect(service.processInbound({ tenant: { id: 'tenant-1' }, body: 'test', from: '+55 11 44444-4444', to: '+55 15 99887-7766', messageSid: 'sid-6' })).rejects.toThrow('Database unavailable');
+    await expect(service.processInbound({ tenant: { id: 'tenant-1' }, body: 'test', from: '+55 11 44444-4444', to: '+55 15 99887-7766', messageSid: 'sid-7' })).rejects.toThrow('Database unavailable');
   });
 });

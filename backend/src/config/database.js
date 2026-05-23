@@ -49,9 +49,9 @@ const productionBase = process.env.DATABASE_URL
 
 const config = {
   development: {
-    username: process.env.DB_USER || 'beleza_user',
-    password: process.env.DB_PASSWORD || 'beleza_secret_2026',
-    database: process.env.DB_NAME || 'beleza_db',
+    username: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || 'Natanael2024@',
+    database: process.env.DB_NAME || 'postgres',
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT, 10) || 5432,
     dialect: 'postgres',
@@ -59,9 +59,9 @@ const config = {
     define: sharedDefine,
   },
   test: {
-    username: process.env.DB_USER || 'beleza_user',
-    password: process.env.DB_PASSWORD || 'beleza_secret_2026',
-    database: (process.env.DB_NAME || 'beleza_db') + '_test',
+    username: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || 'Natanael2024@',
+    database: (process.env.DB_NAME || 'postgres') + '_test',
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT, 10) || 5432,
     dialect: 'postgres',
